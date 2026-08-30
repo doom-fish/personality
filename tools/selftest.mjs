@@ -14,6 +14,7 @@ const DASS = (await import('../tests/dass.js')).default;
 const RSE = (await import('../tests/rse.js')).default;
 const ECR = (await import('../tests/ecr.js')).default;
 const DARK = (await import('../tests/dark.js')).default;
+const RWAS = (await import('../tests/rwas.js')).default;
 const load = (id, f) => JSON.parse(readFileSync(new URL(`data/${id}/${f}.json`, root)));
 
 const root = new URL('../', import.meta.url);
@@ -160,7 +161,7 @@ ok(items.every((i) => i.third[0] === i.third[0].toUpperCase()), 'third-person wo
 console.log(`  ${items.length} items rewritten for informant use, no first person surviving`);
 
 /* ─── the additional tests ─── */
-const extra = [RIASEC, DASS, RSE, ECR, DARK].map((t) =>
+const extra = [RIASEC, DASS, RSE, ECR, DARK, RWAS].map((t) =>
   [t, load(t.id, 'items'), load(t.id, 'norms')]);
 
 for (const [test, ti, tn] of extra) {
@@ -174,6 +175,8 @@ for (const [test, ti, tn] of extra) {
     `expected ${scales.length} scales, found ${new Set(ti.map((i) => i.scale)).size}`);
   ok(test.anchors.length === rhi - rlo + 1,
     `${test.anchors.length} anchors for a ${rhi - rlo + 1}-point scale`);
+  ok(!test.numerals || test.numerals.length === test.anchors.length,
+    'numerals, when given, must match the anchors one for one');
 
   const per = scales.map((s) => ti.filter((i) => i.scale === s).length);
   ok(per.every((n) => n >= 4), 'every scale needs at least 4 items, got ' + per.join('/'));
@@ -303,6 +306,11 @@ section('published keys');
   ok(rev('ecr', 'ANX') === '22', 'ECR anxiety reverse item is 22; got ' + rev('ecr', 'ANX'));
   ok(rev('riasec') === '' && rev('dass') === '' && rev('dark') === '',
     'RIASEC, DASS and the Dark Triad scales have no reverse items');
+  /* a perfectly balanced 10/10 scale is the hardest case for empirical keying */
+  ok(rev('rwas') === '4,6,8,9,11,13,15,18,20,21',
+    'RWA reverse items match Altemeyer\'s published key; got ' + rev('rwas'));
+  ok(load('rwas', 'items').length === 20,
+    "Altemeyer's two unscored warm-up items must not be asked");
   console.log('  derived keys match the published keys for every test');
 }
 
@@ -348,6 +356,27 @@ section('self-esteem');
 }
 
 
+/* a balanced scale cancels any uniform answer to its exact midpoint */
+section('authoritarianism');
+{
+  const ti = load('rwas', 'items');
+  const tn = load('rwas', 'norms');
+  const ctx = { groupLabel: 'everyone', norms: tn, meta: { at: Date.now() } };
+  const run = (v) => RWAS.score(ti, Object.fromEntries(ti.map((i) => [i.seq, v])), tn, 'total');
+  for (let v = 1; v <= 9; v++) {
+    ok(run(v).scales.RWA.raw === 100, `answering every item ${v} must cancel to 100`);
+  }
+  const txt = RWAS.report(run(5), ctx).textContent;
+  ok(/artefact/.test(txt), 'a uniform response set is reported as an artefact');
+  ok(!/less useful number/.test(txt), 'a uniform response set skips the percentile narrative');
+  const keyed = (dir) => RWAS.score(ti, Object.fromEntries(
+    ti.map((i) => [i.seq, (i.keyed === 'plus') === (dir === 'hi') ? 9 : 1])), tn, 'total');
+  ok(keyed('lo').scales.RWA.raw === 20 && keyed('hi').scales.RWA.raw === 180,
+    'keyed floor and ceiling are 20 and 180');
+  ok(/Very low/.test(RWAS.report(keyed('lo'), ctx).textContent), 'the floor reads as very low');
+  console.log('  all nine uniform response sets cancel to the midpoint and are called out');
+}
+
 /* the test registry itself */
 section('registry');
 for (const t of [NEO, RIASEC, DASS, RSE, ECR, DARK]) {
@@ -356,7 +385,7 @@ for (const t of [NEO, RIASEC, DASS, RSE, ECR, DARK]) {
   ok(typeof t.score === 'function' && typeof t.report === 'function', `${t.id}: needs score and report`);
   ok(t.paths && t.paths.items && t.paths.norms, `${t.id}: needs data paths`);
 }
-const ALL = [NEO, RIASEC, DASS, RSE, ECR, DARK];
+const ALL = [NEO, RIASEC, DASS, RSE, ECR, DARK, RWAS];
 ok(new Set(ALL.map((t) => t.id)).size === ALL.length, 'test ids must be unique');
 ok(new Set(ALL.map((t) => t.storageKey || t.id)).size === ALL.length, 'storage keys must be unique');
 console.log(`  ${ALL.length} tests registered with distinct ids and complete metadata`);

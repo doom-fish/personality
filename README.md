@@ -18,6 +18,7 @@ your own browser's `localStorage` until you delete them.
 | **Attachment** | [ECR](https://doi.org/10.1037/0022-3514.78.2.350) (Brennan, Clark & Shaver, 1998) | 36 | 45,990 |
 | **Career interests** | [O\*NET Interest Profiler](https://www.onetcenter.org/IP.html) short form (RIASEC) | 48 | 134,390 |
 | **Dark Triad** | [Dirty Dozen](https://doi.org/10.1037/a0019265) (Jonason & Webster, 2010) + [HSNS](https://doi.org/10.1006/jrpe.1997.2204) (Hendin & Cheek, 1997) | 22 | 48,872 |
+| **Authoritarianism** | [RWA Scale](https://theauthoritarians.org/) (Altemeyer, 1981; 2006 version) | 20 | 9,475 |
 | **Depression, anxiety and stress** | [DASS-42](http://www2.psy.unsw.edu.au/dass/) (Lovibond & Lovibond, 1995) | 42 | 39,149 |
 
 Every item set is public domain: IPIP releases its items outright, the Interest Profiler is US
@@ -55,17 +56,27 @@ This one doesn't.
   these items, so raw proportions are all that can be stated honestly.
 - **Every scoring key was verified the same way.** The RIASEC keys reproduce alphas of .84 to .90,
   the three DASS scales .92 to .96, self-esteem .91, the two attachment dimensions .92 and .94, and
-  the four dark scales .74 to .82 — each computed from the raw response dumps before any score was
-  interpreted. `tools/build_scales.py` refuses to emit a scale whose alpha falls below .70 or that
+  the four dark scales .74 to .82 and authoritarianism .96 — each computed from the raw response
+  dumps before any score was interpreted. `tools/build_scales.py` refuses to emit a scale whose alpha falls below .70 or that
   contains an item correlating negatively with the rest of its own scale.
 - **The reverse-keyed items were derived from the data and then checked against the published
   keys.** Rather than trusting a transcribed key, `build_scales.py` takes the first principal
   component of each scale's item correlation matrix and flips every item loading negatively on it.
   The result reproduces the published keys **exactly, item for item**: Rosenberg items 3, 5, 8, 9
   and 10; ECR avoidance items 3, 15, 19, 25, 27, 29, 31, 33 and 35; ECR anxiety item 22; and no
-  reversals at all in RIASEC, the DASS or the dark scales. Two independent routes to the same
-  answer is the strongest evidence in this repository that the column mapping, the item text and
-  the scoring all line up. `tools/selftest.mjs` asserts it on every run.
+  reversals at all in RIASEC, the DASS or the dark scales. The hardest case is the RWA scale, which
+  Altemeyer balanced perfectly — ten items worded each way out of twenty — and the derivation
+  recovered his exact split (4, 6, 8, 9, 11, 13, 15, 18, 20, 21) with no key supplied. Two
+  independent routes to the same answer is the strongest evidence in this repository that the
+  column mapping, the item text and the scoring all line up. `tools/selftest.mjs` asserts it on
+  every run.
+- **Where a norm sample is unrepresentative, the report says so with a number rather than a
+  disclaimer.** This matters most for authoritarianism: people who choose to take a test called
+  "Right-wing Authoritarianism" score far lower than the public, so the median visitor sits at 42
+  on a 20–180 scale while a representative American adult sample averaged 90.3. The report
+  therefore leads with the raw score against Altemeyer's own published reference points and
+  computes, from the shipped table, that an average American adult would land near the 82nd
+  percentile of this sample.
 - **The source dataset's own quirks are checked, not assumed.** Johnson's file arrives with
   minus-keyed items already reversed, so the norm builder must not reverse them again while the
   browser scorer must. `build_norms.py` asserts this on every run and stops if it stops being true.
@@ -105,6 +116,17 @@ produces a clean document.
 - The DASS asks about the past seven days. It is a snapshot, not a trait; a bad week moves it a
   long way.
 - Nothing here diagnoses anything or predicts an individual outcome.
+
+## The one instrument with an unclear licence
+
+The authoritarianism scale is the only instrument here whose licence position is not clean, and
+that is worth stating rather than burying. Altemeyer published the scale in full in *The
+Authoritarians* (2006) and released that book as a free download, inviting every reader to take
+the test and printing his own scoring key so they could score it. The book carries a bare copyright notice, grants no licence, and is also sold in
+paperback. Reproducing twenty items with full attribution in a free, non-commercial educational
+tool is squarely within the use the author invited, which is why it is here — but it is not the
+same clean public-domain footing as IPIP, the O\*NET Interest Profiler or the DASS. That is a
+judgement call, not a certainty, and the takedown offer below applies to it in particular.
 
 ## Datasets that were evaluated and rejected
 
@@ -209,7 +231,7 @@ reads everything else from the module. No build step, no dependencies, no framew
 ```sh
 python3 -m pip install numpy
 python3 tools/build_norms.py    # personality
-python3 tools/build_scales.py   # self-esteem, attachment, career interests, dark triad, DASS
+python3 tools/build_scales.py   # self-esteem, attachment, interests, dark triad, RWA, DASS
 node tools/selftest.mjs
 ```
 
@@ -223,7 +245,8 @@ only part of `data/`.
 
 Personality norm tables and the per-group domain matrices are derived from
 [Johnson's IPIP-NEO data repository](https://osf.io/tbmh5/) on OSF, an openly published,
-anonymous research dataset. The self-esteem, attachment, career-interest, dark-triad and DASS norms are derived from the
+anonymous research dataset. The self-esteem, attachment, career-interest, dark-triad, authoritarianism and DASS norms are
+derived from the
 [Open-Source Psychometrics](https://openpsychometrics.org/_rawdata/) response dumps, released
 into the public domain by their maintainer. No licence is declared on that node, so this repository ships only
 derived values — facet and domain sums, with country and exact age removed — rather than a copy of
@@ -237,7 +260,8 @@ they will be removed.
 Application code is MIT (see `LICENSE`). All questionnaire items are public domain: IPIP for the
 personality items, the US Department of Labor for the Interest Profiler, and UNSW for the DASS. The
 Rosenberg, ECR, Dirty Dozen and Hypersensitive Narcissism items were published in full in their
-source articles and have been reproduced freely for decades.
+source articles and have been reproduced freely for decades. The RWA items are Altemeyer's and
+are used as described above.
 Derived norm data is provided for research and personal use with attribution to Johnson (2014) and
 to Open-Source Psychometrics.
 
@@ -253,6 +277,11 @@ lower-level facets of several five-factor models. *Personality Psychology in Eur
 
 Lee, K., & Ashton, M. C. (2004). Psychometric properties of the HEXACO Personality Inventory.
 *Multivariate Behavioral Research*, 39(2), 329–358.
+
+Altemeyer, B. (1981). *Right-wing authoritarianism*. University of Manitoba Press.
+
+Altemeyer, B. (2006). *The Authoritarians*. University of Manitoba. Free download at
+theauthoritarians.org.
 
 Rosenberg, M. (1965). *Society and the adolescent self-image*. Princeton University Press.
 

@@ -5,8 +5,9 @@ import dass from './tests/dass.js';
 import rse from './tests/rse.js';
 import ecr from './tests/ecr.js';
 import dark from './tests/dark.js';
+import rwas from './tests/rwas.js';
 
-const TESTS = [neo, rse, ecr, riasec, dark, dass];
+const TESTS = [neo, rse, ecr, riasec, dark, rwas, dass];
 const byId = Object.fromEntries(TESTS.map((t) => [t.id, t]));
 const keyFor = (t) => t.storageKey || `pt.v1.${t.id}`;
 
@@ -118,11 +119,11 @@ function renderPage() {
     const q = el('div', 'q');
     q.dataset.seq = it.seq;
     q.append(el('div', 'txt', `<b>${it.seq}</b>${esc(itemText(it).replace(/\.$/, ''))}`));
-    const sc = el('div', 'scale' + (a.length === 4 ? ' four' : ''));
+    const sc = el('div', 'scale' + (a.length === 4 ? ' four' : a.length === 9 ? ' nine' : ''));
     for (let v = 1; v <= a.length; v++) {
       const lab = el('label');
       lab.innerHTML = `<input type="radio" name="q${it.seq}" value="${v}"${st.responses[it.seq] === v ? ' checked' : ''}>`
-        + `<span><span class="n">${v}</span>${esc(a[v - 1])}</span>`;
+        + `<span><span class="n">${esc(test.numerals ? test.numerals[v - 1] : v)}</span>${esc(a[v - 1])}</span>`;
       lab.querySelector('input').addEventListener('change', () => { st.responses[it.seq] = v; save(); sync(); });
       sc.append(lab);
     }

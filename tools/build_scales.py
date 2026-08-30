@@ -23,6 +23,11 @@ MIN_ALPHA = 0.70
 HTML_TABLE = ("html", None)
 
 
+def literal(items):
+    """Item wording supplied here rather than read from the codebook."""
+    return ("literal", items)
+
+
 def txt(pattern):
     return ("txt", re.compile(pattern))
 
@@ -93,7 +98,71 @@ DARK = dict(
            "published in full in their source articles",
 )
 
-TESTS = [RIASEC, DASS, RSE, ECR, DARK]
+# The RWAS codebook gives no item wording at all, only "question numbers match to items in
+# Altemeyer, Bob (2007). The Authoritarians." The text below is transcribed from that book,
+# which its author published as a free download. Items 1 and 2 are Altemeyer's deliberately
+# unscored warm-ups, present to let people practise the -4..+4 response format, and they are
+# absent from the key below for the same reason his own scoring instructions skip them.
+RWAS_TEXT = {
+    "Q3": "Our country desperately needs a mighty leader who will do what has to be done to "
+          "destroy the radical new ways and sinfulness that are ruining us.",
+    "Q4": "Gays and lesbians are just as healthy and moral as anybody else.",
+    "Q5": "It is always better to trust the judgment of the proper authorities in government "
+          "and religion than to listen to the noisy rabble-rousers in our society who are "
+          "trying to create doubt in people's minds.",
+    "Q6": "Atheists and others who have rebelled against the established religions are no "
+          "doubt every bit as good and virtuous as those who attend church regularly.",
+    "Q7": "The only way our country can get through the crisis ahead is to get back to our "
+          "traditional values, put some tough leaders in power, and silence the troublemakers "
+          "spreading bad ideas.",
+    "Q8": "There is absolutely nothing wrong with nudist camps.",
+    "Q9": "Our country needs free thinkers who have the courage to defy traditional ways, "
+          "even if this upsets many people.",
+    "Q10": "Our country will be destroyed someday if we do not smash the perversions eating "
+           "away at our moral fiber and traditional beliefs.",
+    "Q11": "Everyone should have their own lifestyle, religious beliefs, and sexual "
+           "preferences, even if it makes them different from everyone else.",
+    "Q12": "The \u201cold-fashioned ways\u201d and the \u201cold-fashioned values\u201d still "
+           "show the best way to live.",
+    "Q13": "You have to admire those who challenged the law and the majority's view by "
+           "protesting for women's abortion rights, for animal rights, or to abolish school "
+           "prayer.",
+    "Q14": "What our country really needs is a strong, determined leader who will crush evil, "
+           "and take us back to our true path.",
+    "Q15": "Some of the best people in our country are those who are challenging our "
+           "government, criticizing religion, and ignoring the \u201cnormal way things are "
+           "supposed to be done.\u201d",
+    "Q16": "God's laws about abortion, pornography and marriage must be strictly followed "
+           "before it is too late, and those who break them must be strongly punished.",
+    "Q17": "There are many radical, immoral people in our country today, who are trying to "
+           "ruin it for their own godless purposes, whom the authorities should put out of "
+           "action.",
+    "Q18": "A \u201cwoman's place\u201d should be wherever she wants to be. The days when women "
+           "are submissive to their husbands and social conventions belong strictly in the past.",
+    "Q19": "Our country will be great if we honor the ways of our forefathers, do what the "
+           "authorities tell us to do, and get rid of the \u201crotten apples\u201d who are "
+           "ruining everything.",
+    "Q20": "There is no \u201cONE right way\u201d to live life; everybody has to create their "
+           "own way.",
+    "Q21": "Homosexuals and feminists should be praised for being brave enough to defy "
+           "\u201ctraditional family values.\u201d",
+    "Q22": "This country would work a lot better if certain groups of troublemakers would just "
+           "shut up and accept their group's traditional place in society.",
+}
+
+RWAS = dict(
+    id="rwas", zip="RWAS.zip", delim=",", response_range=(1, 9),
+    scales={"RWA": "Right-wing authoritarianism"},
+    key={"RWA": [f"Q{i}" for i in range(3, 23)]},
+    col=lambda c: c,
+    text=literal(RWAS_TEXT),
+    order=lambda c: int(c[1:]),
+    source="Open-Source Psychometrics RWAS dump (2015); the Right-wing Authoritarianism "
+           "scale is Altemeyer's, published in full in The Authoritarians (2006), which he "
+           "released as a free download",
+)
+
+TESTS = [RIASEC, DASS, RSE, ECR, DARK, RWAS]
 
 
 def fetch(cfg):
@@ -110,6 +179,8 @@ def fetch(cfg):
 def parse_items(cfg, codebook):
     kind, pat = cfg["text"]
     out = {}
+    if kind == "literal":
+        return dict(pat)
     if kind == "html":
         for code, text in re.findall(r"<td>(Q\d+)</td>\s*<td>INTEGER</td>\s*<td>\"(.*?)\"",
                                      codebook, re.S):
