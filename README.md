@@ -118,6 +118,27 @@ country. Rescaling numerically is easy, but response distributions genuinely dif
 between 5- and 7-point versions of the same items, so the resulting percentiles would be
 approximations dressed up as measurements.
 
+**Cognitive ability, in general.** There is deliberately no IQ-style test here, and it is the one
+gap worth explaining, because every candidate failed on a different requirement.
+
+*ICAR* is the obvious choice — a genuinely public-domain ability measure with a large SAPA dataset
+on Harvard Dataverse (N = 96,958, CC0). Two things kill it. The items are behind a password on
+`icar-project.org`, which asks users to consider themselves "honor-bound" not to post the item
+content or scoring key where they can be accessed freely; the address given for requesting access,
+`icar-project.com`, is now a parked domain, so there is no way to ask. Publishing the items here
+would ignore an explicit request from the instrument's authors. Separately, the SAPA rotating
+design leaves only **4,574** respondents with all sixteen ICAR-16 items — 4.7% of the file — and
+age is recorded in bands that straddle the cutpoints used here, with as few as 11 men over 60.
+
+The alternatives are worse: OpenPsychometrics' matrix-reasoning set has N = 400; its full-scale IQ
+test collects no age or sex at all; its general-knowledge test measures education and cultural
+exposure rather than reasoning. Its vocabulary test is the only near miss — N = 10,398 with exact
+ages and healthy cells — but it is not a validated published instrument and its items are not
+covered by the CC licence that OpenPsychometrics grants to four of its tests.
+
+A cognitive test that cannot show you its items, or cannot norm them honestly, is worse than no
+cognitive test.
+
 **Empathy and Systemising Quotient (N = 13,256).** Would have added a genuinely different
 construct, and the dataset carries sex and age. Rejected on licence: the Autism Research Centre
 retains copyright, permits non-commercial research use only and forbids modification, which is
