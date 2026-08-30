@@ -62,12 +62,47 @@ document.
 - Self-report measures how you describe yourself, which correlates with but is not identical to how
   you behave.
 - The norm sample is a large self-selected internet sample, not a probability sample. It skews
-  young, English-speaking and Western. The 41–50 and 51+ bands are much smaller than the younger ones.
+  young, English-speaking and Western. The 41–50 and 51+ bands are much smaller than the younger
+  ones. Internet convenience samples score somewhat higher on Openness than probability samples,
+  so absolute Openness percentiles in particular should be read with that in mind.
 - Facet scores rest on four items each and are noisy. Treat differences under ~10 percentile points
   as nothing.
 - Nothing here diagnoses anything or predicts an individual outcome.
 
-## Layout
+## Datasets that were evaluated and rejected
+
+Three obvious ways to improve the norms were investigated. All three were rejected, for
+reasons worth recording.
+
+**Johnson's IPIP-NEO-300 (N = 307,313, 145,387 complete).** The 120 items are a subset of the
+300, so this looks like ~35% more cases for free — and it would most help the thin older age
+bands. The column mapping was established by matching item text, then confirmed by reproducing
+Johnson's reliabilities from the extracted columns (largest alpha difference across all 35
+scales: 0.039). The samples are disjoint: zero respondents appear in both files.
+
+It was still rejected. Respondents who finish the 35-minute 300-item inventory score
+consistently **higher on Openness** — d = +0.18 to +0.33 in *every* sex × age band, exactly the
+self-selection you would expect from people willing to sit through it. Merging would move
+Openness percentiles by up to 3.6 points for a purely artefactual reason, while buying well
+under one percentile point of noise reduction. `tools/evaluate_ipip300.py` reproduces this.
+
+**Open-Source Psychometrics `HEXACO.zip` (N = 22,786).** Contains the same IPIP Honesty-Humility
+items word for word, which makes it the only real candidate for norming that scale. Rejected:
+it uses a **7-point** response scale rather than 5-point, and records no sex or age — only
+country. Rescaling numerically is easy, but response distributions genuinely differ in shape
+between 5- and 7-point versions of the same items, so the resulting percentiles would be
+approximations dressed up as measurements.
+
+**SAPA Project (N ≈ 97,000+).** Has sex and age, but its rotating item design covers only 6 of
+the 40 IPIP Honesty-Humility items, includes **zero** Greed Avoidance items, and uses a 6-point
+scale. No path to facet-level norming.
+
+Every large probability-sampled dataset (SOEP, GESIS, MIDUS, Understanding Society, LISS,
+HILDA) uses a short instrument — BFI-10, BFI-S, TIPI — that shares no items with the
+IPIP-NEO-120. There is currently no open, nationally representative dataset using this
+instrument. That is a real gap in the field, not an oversight here.
+
+
 
 ```
 index.html      screens: intro, norm group, questionnaire, report
@@ -77,7 +112,7 @@ rules.js        the pattern detectors that produce the narrative
 data/items.json the 140 items
 data/norms.json percentile tables for 11 sex x age groups
 data/dom/*.bin  domain scores per group, for exact rarity counts
-tools/          regenerate the norm tables from the source dataset
+tools/          regenerate the norm tables, and the dataset evaluations
 ```
 
 ## Regenerating the norms
