@@ -1,0 +1,290 @@
+[
+{
+"scale": "R",
+"code": "R1",
+"text": "Test the quality of parts before shipment",
+"seq": 1
+},
+{
+"scale": "R",
+"code": "R2",
+"text": "Lay brick or tile",
+"seq": 2
+},
+{
+"scale": "R",
+"code": "R3",
+"text": "Work on an offshore oil-drilling rig",
+"seq": 3
+},
+{
+"scale": "R",
+"code": "R4",
+"text": "Assemble electronic parts",
+"seq": 4
+},
+{
+"scale": "R",
+"code": "R5",
+"text": "Operate a grinding machine in a factory",
+"seq": 5
+},
+{
+"scale": "R",
+"code": "R6",
+"text": "Fix a broken faucet",
+"seq": 6
+},
+{
+"scale": "R",
+"code": "R7",
+"text": "Assemble products in a factory",
+"seq": 7
+},
+{
+"scale": "R",
+"code": "R8",
+"text": "Install flooring in houses",
+"seq": 8
+},
+{
+"scale": "I",
+"code": "I1",
+"text": "Study the structure of the human body",
+"seq": 9
+},
+{
+"scale": "I",
+"code": "I2",
+"text": "Study animal behavior",
+"seq": 10
+},
+{
+"scale": "I",
+"code": "I3",
+"text": "Do research on plants or animals",
+"seq": 11
+},
+{
+"scale": "I",
+"code": "I4",
+"text": "Develop a new medical treatment or procedure",
+"seq": 12
+},
+{
+"scale": "I",
+"code": "I5",
+"text": "Conduct biological research",
+"seq": 13
+},
+{
+"scale": "I",
+"code": "I6",
+"text": "Study whales and other types of marine life",
+"seq": 14
+},
+{
+"scale": "I",
+"code": "I7",
+"text": "Work in a biology lab",
+"seq": 15
+},
+{
+"scale": "I",
+"code": "I8",
+"text": "Make a map of the bottom of an ocean",
+"seq": 16
+},
+{
+"scale": "A",
+"code": "A1",
+"text": "Conduct a musical choir",
+"seq": 17
+},
+{
+"scale": "A",
+"code": "A2",
+"text": "Direct a play",
+"seq": 18
+},
+{
+"scale": "A",
+"code": "A3",
+"text": "Design artwork for magazines",
+"seq": 19
+},
+{
+"scale": "A",
+"code": "A4",
+"text": "Write a song",
+"seq": 20
+},
+{
+"scale": "A",
+"code": "A5",
+"text": "Write books or plays",
+"seq": 21
+},
+{
+"scale": "A",
+"code": "A6",
+"text": "Play a musical instrument",
+"seq": 22
+},
+{
+"scale": "A",
+"code": "A7",
+"text": "Perform stunts for a movie or television show",
+"seq": 23
+},
+{
+"scale": "A",
+"code": "A8",
+"text": "Design sets for plays",
+"seq": 24
+},
+{
+"scale": "S",
+"code": "S1",
+"text": "Give career guidance to people",
+"seq": 25
+},
+{
+"scale": "S",
+"code": "S2",
+"text": "Do volunteer work at a non-profit organization",
+"seq": 26
+},
+{
+"scale": "S",
+"code": "S3",
+"text": "Help people who have problems with drugs or alcohol",
+"seq": 27
+},
+{
+"scale": "S",
+"code": "S4",
+"text": "Teach an individual an exercise routine",
+"seq": 28
+},
+{
+"scale": "S",
+"code": "S5",
+"text": "Help people with family-related problems",
+"seq": 29
+},
+{
+"scale": "S",
+"code": "S6",
+"text": "Supervise the activities of children at a camp",
+"seq": 30
+},
+{
+"scale": "S",
+"code": "S7",
+"text": "Teach children how to read",
+"seq": 31
+},
+{
+"scale": "S",
+"code": "S8",
+"text": "Help elderly people with their daily activities",
+"seq": 32
+},
+{
+"scale": "E",
+"code": "E1",
+"text": "Sell restaurant franchises to individuals",
+"seq": 33
+},
+{
+"scale": "E",
+"code": "E2",
+"text": "Sell merchandise at a department store",
+"seq": 34
+},
+{
+"scale": "E",
+"code": "E3",
+"text": "Manage the operations of a hotel",
+"seq": 35
+},
+{
+"scale": "E",
+"code": "E4",
+"text": "Operate a beauty salon or barber shop",
+"seq": 36
+},
+{
+"scale": "E",
+"code": "E5",
+"text": "Manage a department within a large company",
+"seq": 37
+},
+{
+"scale": "E",
+"code": "E6",
+"text": "Manage a clothing store",
+"seq": 38
+},
+{
+"scale": "E",
+"code": "E7",
+"text": "Sell houses",
+"seq": 39
+},
+{
+"scale": "E",
+"code": "E8",
+"text": "Run a toy store",
+"seq": 40
+},
+{
+"scale": "C",
+"code": "C1",
+"text": "Generate the monthly payroll checks for an office",
+"seq": 41
+},
+{
+"scale": "C",
+"code": "C2",
+"text": "Inventory supplies using a hand-held computer",
+"seq": 42
+},
+{
+"scale": "C",
+"code": "C3",
+"text": "Use a computer program to generate customer bills",
+"seq": 43
+},
+{
+"scale": "C",
+"code": "C4",
+"text": "Maintain employee records",
+"seq": 44
+},
+{
+"scale": "C",
+"code": "C5",
+"text": "Compute and record statistical and other numerical data",
+"seq": 45
+},
+{
+"scale": "C",
+"code": "C6",
+"text": "Operate a calculator",
+"seq": 46
+},
+{
+"scale": "C",
+"code": "C7",
+"text": "Handle customers' bank transactions",
+"seq": 47
+},
+{
+"scale": "C",
+"code": "C8",
+"text": "Keep shipping and receiving records",
+"seq": 48
+}
+]

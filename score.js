@@ -147,3 +147,36 @@ export function contradictions(result, minGap = 3) {
   }
   return out.sort((x, y) => y.gap - x.gap);
 }
+
+/** Scoring for the simple sum-per-scale tests (RIASEC, DASS): no reverse keys, no facets. */
+export function scoreScales(items, responses, norms, groupKey) {
+  const group = norms.groups[groupKey] || norms.groups.total;
+  const lo = norms.meta.scale_range[0];
+  const scales = {};
+  for (const it of items) {
+    const s = (scales[it.scale] ??= { scale: it.scale, raw: 0, n: 0 });
+    s.raw += responses[it.seq];
+    s.n++;
+  }
+  for (const s of Object.values(scales)) s.pct = lookup(group.s[s.scale], s.raw, lo);
+  return {
+    scales, responses, items,
+    group: { key: groupKey, n: group.n },
+    style: responseStyle(items, responses, norms.meta.response_range),
+  };
+}
+
+/** Response-style checks that need no keying: usable on any single-scale-direction test. */
+export function responseStyle(items, responses, [lo, hi]) {
+  const all = items.map((i) => responses[i.seq]);
+  const pctOf = (f) => Math.round((1000 * all.filter(f).length) / all.length) / 10;
+  let best = 1, cur = 1;
+  for (let i = 1; i < all.length; i++) {
+    cur = all[i] === all[i - 1] ? cur + 1 : 1;
+    if (cur > best) best = cur;
+  }
+  const flags = [];
+  if (pctOf((x) => x === lo || x === hi) > 80) flags.push('Almost every answer sat at one end of the scale, which flattens the differences between scales.');
+  if (best >= Math.max(10, items.length / 4)) flags.push(`${best} identical answers in a row — check that the questions were being read.`);
+  return { extreme: pctOf((x) => x === lo || x === hi), longestRun: best, flags };
+}

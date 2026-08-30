@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Personality Assessment — IPIP-NEO-120 + HEXACO-H</title>
-<meta name="description" content="A 140-item public-domain personality assessment scored against empirical norms. Everything runs in your browser; nothing is uploaded.">
+<title>Psychometrics — public-domain tests, real norms</title>
+<meta name="description" content="Public-domain psychological tests scored against empirical norms from real open datasets. Everything runs in your browser; nothing is uploaded.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23245c73'/><rect x='6' y='9' width='20' height='3' rx='1.5' fill='%23fff'/><rect x='6' y='15' width='13' height='3' rx='1.5' fill='%23fff' opacity='.75'/><rect x='6' y='21' width='17' height='3' rx='1.5' fill='%23fff' opacity='.5'/></svg>">
 </head>
 <body>
 
 <div class="topbar noprint">
-  <strong style="font-size:14px">Personality Assessment</strong>
+  <strong style="font-size:14px"><a id="home" href="#" style="color:inherit;text-decoration:none">Psychometrics</a></strong>
   <span class="sp"></span>
   <span id="crumb" class="muted"></span>
   <button id="theme" class="small" title="Toggle dark mode">Dark</button>
@@ -19,22 +19,20 @@
 
 <div class="wrap">
 
-<!-- ─── intro ─── -->
-<section id="s-intro">
-  <h1>Personality Assessment</h1>
-  <p class="lede">140 public-domain items. Scored against empirical norms from 410,376 people. Blunt, not flattering.</p>
+<!-- ─── home ─── -->
+<section id="s-home">
+  <h1>Psychometrics</h1>
+  <p class="lede">Public-domain tests, scored against percentile norms computed from real open datasets.
+  Blunt, not flattering. Nothing is uploaded.</p>
+
+  <div id="tests"></div>
 
   <div class="card">
-    <h3 style="margin-top:0">What this actually is</h3>
-    <p>Two instruments, both public domain, both with published validity evidence:</p>
-    <table style="margin-bottom:14px">
-      <tr><td class="nm">IPIP-NEO-120<span class="sub">Johnson (2014)</span></td>
-          <td>120 items measuring the Big Five across 30 facets. Facet reliabilities .64–.88.</td></tr>
-      <tr><td class="nm">IPIP HEXACO-H<span class="sub">Ashton &amp; Lee</span></td>
-          <td>20 items measuring Honesty-Humility — the trait the Big Five omits.</td></tr>
-    </table>
-    <p class="muted">Your percentiles come from Johnson's validation dataset, restricted to your own sex and
-    age band, using exact tie-corrected ranks — not a bell-curve approximation. No norms are invented.</p>
+    <h3 style="margin-top:0">How this differs from the usual online test</h3>
+    <p class="muted">Every percentile here is an exact tie-corrected rank against a named dataset of real
+    respondents of your own sex and age band — not a bell-curve approximation and not an invented norm. Every
+    scoring key was verified by reproducing the instrument's published reliabilities before any score was
+    interpreted. Where honest norms do not exist, no percentile is shown.</p>
   </div>
 
   <div class="card">
@@ -44,14 +42,7 @@
     and resume; “Delete my data” erases it.</p>
   </div>
 
-  <div class="callout">
-    <b>This gives blunt output.</b> It reports what the numbers say, including the unflattering parts.
-    It is a research-grade self-report questionnaire, not a clinical assessment, and it cannot diagnose anything.
-  </div>
-
   <div class="row" style="margin-top:18px">
-    <button class="primary" id="go">Begin</button>
-    <button id="resume" class="hide">Resume</button>
     <button id="loadfile">Load a saved result</button>
     <input type="file" id="file" accept="application/json" class="hide">
   </div>
@@ -59,13 +50,37 @@
 
 <!-- ─── setup ─── -->
 <section id="s-setup" class="hide">
-  <h1>Norm group</h1>
-  <p class="lede">Personality norms differ by sex and age. These two answers select your comparison group;
-  they are not scored.</p>
+  <h1 id="setup-title">Norm group</h1>
+  <p class="lede" id="setup-sub"></p>
+
+  <div class="card hide" id="mode-box">
+    <label class="fld" for="mode">Who is answering?</label>
+    <select id="mode">
+      <option value="self">I am rating myself</option>
+      <option value="informant">I am rating someone else</option>
+    </select>
+    <p class="tiny" style="margin:12px 0 0">Informant ratings are the cheapest way around the main weakness of
+    self-report. Ask someone who knows you well to take it about you, export both results and compare them —
+    observers see traits like Extraversion and Conscientiousness more accurately than you do, and private ones
+    like Neuroticism less accurately.</p>
+    <div id="subject-box" class="hide" style="margin-top:12px">
+      <label class="fld" for="subject">Their first name (optional, stays in this browser)</label>
+      <input type="text" id="subject" maxlength="30" placeholder="this person">
+    </div>
+  </div>
+
+  <div class="callout hide" id="care-box">
+    <b>Before you start.</b> This questionnaire asks about low mood, anxiety and stress in the past week.
+    It is a screening tool, not a diagnosis, and this page gives no medical advice. If you are struggling,
+    <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists free
+    helplines by country.
+  </div>
+
   <div class="card">
+    <p class="fld" id="demo-label" style="margin-top:0">About you</p>
     <div class="grid2">
       <div>
-        <label class="fld" for="sex">Compare me against</label>
+        <label class="fld" for="sex">Compare against</label>
         <select id="sex">
           <option value="1">Men</option>
           <option value="2">Women</option>
@@ -81,7 +96,7 @@
   </div>
   <div class="row">
     <button class="primary" id="start">Start the questionnaire</button>
-    <button id="back-intro">Back</button>
+    <button id="back-home">Back</button>
   </div>
 </section>
 
@@ -91,10 +106,10 @@
     <div class="prog"><i id="bar" style="width:0%"></i></div>
     <div class="row" style="justify-content:space-between">
       <span class="muted" id="count"></span>
-      <span class="muted">Describe yourself as you generally are now — not as you wish to be.</span>
+      <span class="muted" id="prompt"></span>
     </div>
   </div>
-  <p class="tiny" style="margin-bottom:0">Keys <b>1</b>–<b>5</b> answer the first unanswered item on the page.</p>
+  <p class="tiny" style="margin-bottom:0">Number keys answer the first unanswered item on the page.</p>
   <div id="qs"></div>
   <div class="row" style="margin-top:20px">
     <button id="prev">Back</button>

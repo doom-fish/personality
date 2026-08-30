@@ -1,22 +1,36 @@
-# Personality Assessment
+# Psychometrics
 
-A 140-item personality questionnaire that scores itself in your browser, against empirical
-norms computed from 410,376 real respondents.
+Public-domain psychological tests that score themselves in your browser, against percentile
+norms recomputed from real open datasets.
 
-**→ [Take it](https://doom-fish.github.io/personality/)**
+**→ [Take them](https://doom-fish.github.io/personality/)**
 
 Nothing is uploaded. There is no server, no account, no analytics and no third-party request.
 Scoring, norming and report generation all happen client-side; your answers are stored only in
 your own browser's `localStorage` until you delete them.
 
-## What it measures
+## The tests
 
-| Instrument | Items | Covers |
-| --- | --- | --- |
-| [IPIP-NEO-120](https://ipip.ori.org/) (Johnson, 2014) | 120 | Big Five, broken into 30 facets |
-| [IPIP HEXACO Honesty-Humility](https://ipip.ori.org/newHEXACO_PI_key.htm) | 20 | Sincerity, Fairness, Greed Avoidance, Modesty |
+| Test | Instrument | Items | Norm sample |
+| --- | --- | --- | --- |
+| **Personality** | [IPIP-NEO-120](https://ipip.ori.org/) (Johnson, 2014) + [IPIP HEXACO Honesty-Humility](https://ipip.ori.org/newHEXACO_PI_key.htm) | 140 | 410,376 |
+| **Career interests** | [O\*NET Interest Profiler](https://www.onetcenter.org/IP.html) short form (RIASEC) | 48 | 134,390 |
+| **Depression, anxiety and stress** | [DASS-42](http://www2.psy.unsw.edu.au/dass/) (Lovibond & Lovibond, 1995) | 42 | 39,149 |
 
-Both item sets are in the public domain.
+Every item set is public domain: IPIP releases its items outright, the Interest Profiler is US
+Department of Labor work, and UNSW states that the DASS is public domain.
+
+The DASS report leads with Lovibond and Lovibond's published severity cut-offs rather than the
+percentile, because the norm sample is people who chose to take a depression questionnaire on the
+internet — the *average* respondent in it scores in the severe range. The report says so.
+
+## Informant ratings
+
+The personality test can be taken *about* someone else: every item has a third-person wording, and
+the report is written in the third person. Self- and informant ratings of the same person correlate
+around .4 to .6, and the disagreements are informative — observers are more accurate than the person
+themselves on visible traits like Extraversion, and less accurate on private ones like Neuroticism.
+Export both results and use "Compare with another result".
 
 ## Why the numbers are trustworthy
 
@@ -36,6 +50,13 @@ This one doesn't.
   half, so the app ships actual domain scores and counts them directly.
 - **Honesty-Humility is deliberately reported without percentiles.** No population norms exist for
   these items, so raw proportions are all that can be stated honestly.
+- **Every scoring key was verified the same way.** The RIASEC keys reproduce alphas of .84 to .90
+  and the three DASS scales .92 to .96, each computed from the raw response dumps before any score
+  was interpreted. `tools/build_scales.py` refuses to emit a scale whose alpha falls below .70 or
+  that contains an item correlating negatively with the rest of its own scale.
+- **The source dataset's own quirks are checked, not assumed.** Johnson's file arrives with
+  minus-keyed items already reversed, so the norm builder must not reverse them again while the
+  browser scorer must. `build_norms.py` asserts this on every run and stops if it stops being true.
 
 IPIP's own position is worth quoting: it publishes no norms and
 [warns](https://ipip.ori.org/newNorms.htm) that most published "norms" are misleading. That is
@@ -53,9 +74,9 @@ An LLM was considered and rejected for this. The findings are pattern detections
 a rule engine is instant, offline, auditable, and cannot hallucinate a percentile.
 
 Also included: response-validity checks (acquiescence, midpoint and extreme responding, long
-identical runs), within-facet contradictions, dark mode, resume, JSON export/import, comparison of
-two saved results, and a print stylesheet so the browser's own "Save as PDF" produces a clean
-document.
+identical runs), within-facet contradictions, dark mode, per-test resume, JSON export/import,
+comparison of two saved results, and a print stylesheet so the browser's own "Save as PDF"
+produces a clean document.
 
 ## Limitations, stated plainly
 
@@ -67,12 +88,16 @@ document.
   so absolute Openness percentiles in particular should be read with that in mind.
 - Facet scores rest on four items each and are noisy. Treat differences under ~10 percentile points
   as nothing.
+- Interest scores say what you would enjoy, not what you would be good at, and not what you would
+  be hired for.
+- The DASS asks about the past seven days. It is a snapshot, not a trait; a bad week moves it a
+  long way.
 - Nothing here diagnoses anything or predicts an individual outcome.
 
 ## Datasets that were evaluated and rejected
 
-Three obvious ways to improve the norms were investigated. All three were rejected, for
-reasons worth recording.
+Several ways to add tests or improve the norms were investigated and rejected. The reasons are
+worth recording, because they are the same reasons most online tests should not be trusted.
 
 **Johnson's IPIP-NEO-300 (N = 307,313, 145,387 complete).** The 120 items are a subset of the
 300, so this looks like ~35% more cases for free — and it would most help the thin older age
@@ -93,6 +118,14 @@ country. Rescaling numerically is easy, but response distributions genuinely dif
 between 5- and 7-point versions of the same items, so the resulting percentiles would be
 approximations dressed up as measurements.
 
+**Empathy and Systemising Quotient (N = 13,256).** Would have added a genuinely different
+construct, and the dataset carries sex and age. Rejected on licence: the Autism Research Centre
+retains copyright, permits non-commercial research use only and forbids modification, which is
+incompatible with an MIT-licensed public web app. The dataset also ships no scoring key.
+
+**Short Dark Triad (N = 18,192).** Records country only — no sex and no age — so it fails the same
+test as HEXACO below.
+
 **SAPA Project (N ≈ 97,000+).** Has sex and age, but its rotating item design covers only 6 of
 the 40 IPIP Honesty-Humility items, includes **zero** Greed Avoidance items, and uses a 6-point
 scale. No path to facet-level norming.
@@ -104,31 +137,44 @@ instrument. That is a real gap in the field, not an oversight here.
 
 
 
+## Layout
+
 ```
-index.html      screens: intro, norm group, questionnaire, report
-app.js          flow control, persistence, report rendering, comparison
-score.js        scoring, percentile lookup, validity checks, profile rarity
-rules.js        the pattern detectors that produce the narrative
-data/items.json the 140 items
-data/norms.json percentile tables for 11 sex x age groups
-data/dom/*.bin  domain scores per group, for exact rarity counts
-tools/          regenerate the norm tables, and the dataset evaluations
+index.html         screens: home, norm group, questionnaire, report
+app.js             the shell: test registry, flow, persistence, import/export
+ui.js              shared rendering helpers
+score.js           scoring, percentile lookup, validity checks, profile rarity
+rules.js           the pattern detectors behind the personality narrative
+tests/*.js         one module per test: metadata, scoring call, report
+data/              items and percentile tables, one directory per test
+data/dom/*.bin     domain scores per group, for exact rarity counts
+tools/build_*.py   regenerate the norm tables from the raw datasets
+tools/selftest.mjs the test suite CI runs
 ```
+
+Adding a test means adding one module under `tests/` and one directory under `data/`; the shell
+reads everything else from the module. No build step, no dependencies, no framework.
 
 ## Regenerating the norms
 
 ```sh
 python3 -m pip install numpy
-python3 tools/build_norms.py
+python3 tools/build_norms.py    # personality
+python3 tools/build_scales.py   # career interests, DASS
+node tools/selftest.mjs
 ```
 
-Downloads the 95 MB source dataset to `/tmp` on first run and rewrites everything under `data/`.
+Each builder downloads its source dataset to `/tmp` on first run, validates the scoring key by
+reproducing the instrument's published reliabilities, and rewrites the relevant part of `data/`.
+A builder that cannot reproduce those reliabilities exits rather than emitting norms.
 
 ## Data provenance
 
-Norm tables and the per-group domain matrices are derived from
+Personality norm tables and the per-group domain matrices are derived from
 [Johnson's IPIP-NEO data repository](https://osf.io/tbmh5/) on OSF, an openly published,
-anonymous research dataset. No licence is declared on that node, so this repository ships only
+anonymous research dataset. The career-interest and DASS norms are derived from the
+[Open-Source Psychometrics](https://openpsychometrics.org/_rawdata/) response dumps, released
+into the public domain by their maintainer. No licence is declared on that node, so this repository ships only
 derived values — facet and domain sums, with country and exact age removed — rather than a copy of
 the source data, and `tools/build_norms.py` lets anyone reproduce them from the original.
 
@@ -137,8 +183,12 @@ they will be removed.
 
 ## Licence
 
-Application code is MIT (see `LICENSE`). The questionnaire items are public domain via IPIP.
-Derived norm data is provided for research and personal use with attribution to Johnson (2014).
+Application code is MIT (see `LICENSE`). All questionnaire items are public domain: IPIP for the
+personality items, the US Department of Labor for the Interest Profiler, and UNSW for the DASS.
+Derived norm data is provided for research and personal use with attribution to Johnson (2014) and
+to Open-Source Psychometrics.
+
+This is not a medical device and gives no medical advice. Nothing here diagnoses anything.
 
 ## References
 
@@ -150,3 +200,12 @@ lower-level facets of several five-factor models. *Personality Psychology in Eur
 
 Lee, K., & Ashton, M. C. (2004). Psychometric properties of the HEXACO Personality Inventory.
 *Multivariate Behavioral Research*, 39(2), 329–358.
+
+Lovibond, S. H., & Lovibond, P. F. (1995). *Manual for the Depression Anxiety Stress Scales*
+(2nd ed.). Psychology Foundation of Australia.
+
+Rounds, J., Su, R., Lewis, P., & Rivkin, D. (2010). *O\*NET Interest Profiler Short Form
+psychometric characteristics: Summary*. US Department of Labor.
+
+Vazire, S. (2010). Who knows what about a person? The self-other knowledge asymmetry (SOKA)
+model. *Journal of Personality and Social Psychology*, 98(2), 281–300.
