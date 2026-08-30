@@ -27,6 +27,33 @@ for k, it in enumerate(neo):
     DIDX.setdefault(it["domain"], []).append(k)
 
 
+def check_pre_reversed(sample=60000):
+    """Johnson's file already stores responses recoded in the scored direction.
+
+    Nothing below reverses minus-keyed items, while score.js reverses them in the browser.
+    That is only consistent because of the recoding, so verify it rather than assume it: in a
+    pre-reversed file every minus-keyed item correlates positively with its facet's plus items.
+    A raw file would silently mirror 39 items and quietly corrupt the norms.
+    """
+    g = r[:sample].astype(np.float64)
+    worst, worst_item = 1.0, None
+    for idx in FIDX.values():
+        plus = [k for k in idx if neo[k]["keyed"] == "plus"]
+        for k in (k for k in idx if neo[k]["keyed"] == "minus"):
+            if not plus:
+                continue
+            c = np.corrcoef(g[:, k], g[:, plus].mean(1))[0, 1]
+            if c < worst:
+                worst, worst_item = c, neo[k]["text"]
+    if worst <= 0:
+        sys.exit(f"dataset looks raw, not pre-reversed ({worst:+.2f} for {worst_item!r}); "
+                 "reverse minus-keyed items before building norms")
+    print(f"pre-reversal check ok (weakest minus item r={worst:+.2f})", file=sys.stderr)
+
+
+check_pre_reversed()
+
+
 def table(scores, lo, hi):
     """Tie-corrected percentile for every possible raw score in [lo, hi]."""
     n = len(scores)
