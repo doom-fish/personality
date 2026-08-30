@@ -2,8 +2,11 @@ import { $, el, esc } from './ui.js';
 import neo from './tests/neo.js';
 import riasec from './tests/riasec.js';
 import dass from './tests/dass.js';
+import rse from './tests/rse.js';
+import ecr from './tests/ecr.js';
+import dark from './tests/dark.js';
 
-const TESTS = [neo, riasec, dass];
+const TESTS = [neo, rse, ecr, riasec, dark, dass];
 const byId = Object.fromEntries(TESTS.map((t) => [t.id, t]));
 const keyFor = (t) => t.storageKey || `pt.v1.${t.id}`;
 

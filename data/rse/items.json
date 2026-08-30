@@ -1,0 +1,72 @@
+[
+{
+"scale": "SE",
+"code": "Q1",
+"text": "I feel that I am a person of worth, at least on an equal plane with others.",
+"keyed": "plus",
+"seq": 1
+},
+{
+"scale": "SE",
+"code": "Q2",
+"text": "I feel that I have a number of good qualities.",
+"keyed": "plus",
+"seq": 2
+},
+{
+"scale": "SE",
+"code": "Q3",
+"text": "All in all, I am inclined to feel that I am a failure.",
+"keyed": "minus",
+"seq": 3
+},
+{
+"scale": "SE",
+"code": "Q4",
+"text": "I am able to do things as well as most other people.",
+"keyed": "plus",
+"seq": 4
+},
+{
+"scale": "SE",
+"code": "Q5",
+"text": "I feel I do not have much to be proud of.",
+"keyed": "minus",
+"seq": 5
+},
+{
+"scale": "SE",
+"code": "Q6",
+"text": "I take a positive attitude toward myself.",
+"keyed": "plus",
+"seq": 6
+},
+{
+"scale": "SE",
+"code": "Q7",
+"text": "On the whole, I am satisfied with myself.",
+"keyed": "plus",
+"seq": 7
+},
+{
+"scale": "SE",
+"code": "Q8",
+"text": "I wish I could have more respect for myself.",
+"keyed": "minus",
+"seq": 8
+},
+{
+"scale": "SE",
+"code": "Q9",
+"text": "I certainly feel useless at times.",
+"keyed": "minus",
+"seq": 9
+},
+{
+"scale": "SE",
+"code": "Q10",
+"text": "At times I think I am no good at all.",
+"keyed": "minus",
+"seq": 10
+}
+]

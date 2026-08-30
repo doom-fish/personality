@@ -14,7 +14,10 @@ your own browser's `localStorage` until you delete them.
 | Test | Instrument | Items | Norm sample |
 | --- | --- | --- | --- |
 | **Personality** | [IPIP-NEO-120](https://ipip.ori.org/) (Johnson, 2014) + [IPIP HEXACO Honesty-Humility](https://ipip.ori.org/newHEXACO_PI_key.htm) | 140 | 410,376 |
+| **Self-esteem** | [Rosenberg Self-Esteem Scale](https://www.google.com/search?q=rosenberg+self+esteem+scale) (Rosenberg, 1965) | 10 | 44,923 |
+| **Attachment** | [ECR](https://doi.org/10.1037/0022-3514.78.2.350) (Brennan, Clark & Shaver, 1998) | 36 | 45,990 |
 | **Career interests** | [O\*NET Interest Profiler](https://www.onetcenter.org/IP.html) short form (RIASEC) | 48 | 134,390 |
+| **Dark Triad** | [Dirty Dozen](https://doi.org/10.1037/a0019265) (Jonason & Webster, 2010) + [HSNS](https://doi.org/10.1006/jrpe.1997.2204) (Hendin & Cheek, 1997) | 22 | 48,872 |
 | **Depression, anxiety and stress** | [DASS-42](http://www2.psy.unsw.edu.au/dass/) (Lovibond & Lovibond, 1995) | 42 | 39,149 |
 
 Every item set is public domain: IPIP releases its items outright, the Interest Profiler is US
@@ -50,10 +53,19 @@ This one doesn't.
   half, so the app ships actual domain scores and counts them directly.
 - **Honesty-Humility is deliberately reported without percentiles.** No population norms exist for
   these items, so raw proportions are all that can be stated honestly.
-- **Every scoring key was verified the same way.** The RIASEC keys reproduce alphas of .84 to .90
-  and the three DASS scales .92 to .96, each computed from the raw response dumps before any score
-  was interpreted. `tools/build_scales.py` refuses to emit a scale whose alpha falls below .70 or
-  that contains an item correlating negatively with the rest of its own scale.
+- **Every scoring key was verified the same way.** The RIASEC keys reproduce alphas of .84 to .90,
+  the three DASS scales .92 to .96, self-esteem .91, the two attachment dimensions .92 and .94, and
+  the four dark scales .74 to .82 — each computed from the raw response dumps before any score was
+  interpreted. `tools/build_scales.py` refuses to emit a scale whose alpha falls below .70 or that
+  contains an item correlating negatively with the rest of its own scale.
+- **The reverse-keyed items were derived from the data and then checked against the published
+  keys.** Rather than trusting a transcribed key, `build_scales.py` takes the first principal
+  component of each scale's item correlation matrix and flips every item loading negatively on it.
+  The result reproduces the published keys **exactly, item for item**: Rosenberg items 3, 5, 8, 9
+  and 10; ECR avoidance items 3, 15, 19, 25, 27, 29, 31, 33 and 35; ECR anxiety item 22; and no
+  reversals at all in RIASEC, the DASS or the dark scales. Two independent routes to the same
+  answer is the strongest evidence in this repository that the column mapping, the item text and
+  the scoring all line up. `tools/selftest.mjs` asserts it on every run.
 - **The source dataset's own quirks are checked, not assumed.** Johnson's file arrives with
   minus-keyed items already reversed, so the norm builder must not reverse them again while the
   browser scorer must. `build_norms.py` asserts this on every run and stops if it stops being true.
@@ -118,6 +130,22 @@ country. Rescaling numerically is easy, but response distributions genuinely dif
 between 5- and 7-point versions of the same items, so the resulting percentiles would be
 approximations dressed up as measurements.
 
+**Open-Source Psychometrics `NIS.zip` (N = 130,345).** A large file measuring nonverbal
+immediacy, and it would have been the biggest norm sample after RIASEC. Rejected on construct
+grounds rather than data quality: the instrument asks you to rate your own gestures, eye contact
+and vocal expressiveness, which is the one domain where self-report and observer report agree
+least. An informant version would be meaningful; a self-report one mostly measures self-image.
+
+**MACH-IV (N = 79,048) and 16PF / Big Five dumps.** Both are large, clean and free. Both were
+rejected as redundant: Machiavellianism is already covered by the Dirty Dozen subscale, and the
+five-factor dumps measure what the 140-item IPIP-NEO here already measures with far more
+resolution. Adding a second, shorter version of a test the app already has is padding.
+
+**OSRI (N = 288,099).** The largest usable file of the lot. Rejected because the construct —
+masculinity and femininity as separate orthogonal dimensions — is contested, the instrument is
+not independently validated, and the resulting report would state something contentious with
+unearned precision.
+
 **Cognitive ability, in general.** There is deliberately no IQ-style test here, and it is the one
 gap worth explaining, because every candidate failed on a different requirement.
 
@@ -181,19 +209,21 @@ reads everything else from the module. No build step, no dependencies, no framew
 ```sh
 python3 -m pip install numpy
 python3 tools/build_norms.py    # personality
-python3 tools/build_scales.py   # career interests, DASS
+python3 tools/build_scales.py   # self-esteem, attachment, career interests, dark triad, DASS
 node tools/selftest.mjs
 ```
 
 Each builder downloads its source dataset to `/tmp` on first run, validates the scoring key by
 reproducing the instrument's published reliabilities, and rewrites the relevant part of `data/`.
 A builder that cannot reproduce those reliabilities exits rather than emitting norms.
+`build_scales.py` takes test ids as arguments (`python3 tools/build_scales.py rse ecr`) to rebuild
+only part of `data/`.
 
 ## Data provenance
 
 Personality norm tables and the per-group domain matrices are derived from
 [Johnson's IPIP-NEO data repository](https://osf.io/tbmh5/) on OSF, an openly published,
-anonymous research dataset. The career-interest and DASS norms are derived from the
+anonymous research dataset. The self-esteem, attachment, career-interest, dark-triad and DASS norms are derived from the
 [Open-Source Psychometrics](https://openpsychometrics.org/_rawdata/) response dumps, released
 into the public domain by their maintainer. No licence is declared on that node, so this repository ships only
 derived values — facet and domain sums, with country and exact age removed — rather than a copy of
@@ -205,7 +235,9 @@ they will be removed.
 ## Licence
 
 Application code is MIT (see `LICENSE`). All questionnaire items are public domain: IPIP for the
-personality items, the US Department of Labor for the Interest Profiler, and UNSW for the DASS.
+personality items, the US Department of Labor for the Interest Profiler, and UNSW for the DASS. The
+Rosenberg, ECR, Dirty Dozen and Hypersensitive Narcissism items were published in full in their
+source articles and have been reproduced freely for decades.
 Derived norm data is provided for research and personal use with attribution to Johnson (2014) and
 to Open-Source Psychometrics.
 
@@ -221,6 +253,18 @@ lower-level facets of several five-factor models. *Personality Psychology in Eur
 
 Lee, K., & Ashton, M. C. (2004). Psychometric properties of the HEXACO Personality Inventory.
 *Multivariate Behavioral Research*, 39(2), 329–358.
+
+Rosenberg, M. (1965). *Society and the adolescent self-image*. Princeton University Press.
+
+Brennan, K. A., Clark, C. L., & Shaver, P. R. (1998). Self-report measurement of adult attachment:
+An integrative overview. In J. A. Simpson & W. S. Rholes (Eds.), *Attachment theory and close
+relationships* (pp. 46–76). Guilford Press.
+
+Jonason, P. K., & Webster, G. D. (2010). The Dirty Dozen: A concise measure of the Dark Triad.
+*Psychological Assessment*, 22(2), 420–432.
+
+Hendin, H. M., & Cheek, J. M. (1997). Assessing hypersensitive narcissism: A re-examination of
+Murray's Narcism Scale. *Journal of Research in Personality*, 31(4), 588–599.
 
 Lovibond, S. H., & Lovibond, P. F. (1995). *Manual for the Depression Anxiety Stress Scales*
 (2nd ed.). Psychology Foundation of Australia.

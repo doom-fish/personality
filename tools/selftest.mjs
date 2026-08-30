@@ -11,6 +11,10 @@ install();
 const NEO = (await import('../tests/neo.js')).default;
 const RIASEC = (await import('../tests/riasec.js')).default;
 const DASS = (await import('../tests/dass.js')).default;
+const RSE = (await import('../tests/rse.js')).default;
+const ECR = (await import('../tests/ecr.js')).default;
+const DARK = (await import('../tests/dark.js')).default;
+const load = (id, f) => JSON.parse(readFileSync(new URL(`data/${id}/${f}.json`, root)));
 
 const root = new URL('../', import.meta.url);
 const items = JSON.parse(readFileSync(new URL('data/items.json', root)));
@@ -156,12 +160,8 @@ ok(items.every((i) => i.third[0] === i.third[0].toUpperCase()), 'third-person wo
 console.log(`  ${items.length} items rewritten for informant use, no first person surviving`);
 
 /* ─── the additional tests ─── */
-const extra = [
-  [RIASEC, JSON.parse(readFileSync(new URL('data/riasec/items.json', root))),
-           JSON.parse(readFileSync(new URL('data/riasec/norms.json', root)))],
-  [DASS,   JSON.parse(readFileSync(new URL('data/dass/items.json', root))),
-           JSON.parse(readFileSync(new URL('data/dass/norms.json', root)))],
-];
+const extra = [RIASEC, DASS, RSE, ECR, DARK].map((t) =>
+  [t, load(t.id, 'items'), load(t.id, 'norms')]);
 
 for (const [test, ti, tn] of extra) {
   section(test.id);
@@ -176,14 +176,18 @@ for (const [test, ti, tn] of extra) {
     `${test.anchors.length} anchors for a ${rhi - rlo + 1}-point scale`);
 
   const per = scales.map((s) => ti.filter((i) => i.scale === s).length);
-  ok(new Set(per).size === 1, 'scales should have equal item counts, got ' + per.join('/'));
-  ok(tn.meta.scale_range[0] === per[0] * rlo && tn.meta.scale_range[1] === per[0] * rhi,
-    'declared scale range must match items x response range');
+  ok(per.every((n) => n >= 4), 'every scale needs at least 4 items, got ' + per.join('/'));
+  ok(ti.every((i) => ['plus', 'minus'].includes(i.keyed)), 'every item needs a keying direction');
+  for (const s of scales) {
+    const n = ti.filter((i) => i.scale === s).length;
+    ok(tn.meta.scale_range[s][0] === n * rlo && tn.meta.scale_range[s][1] === n * rhi,
+      `${s}: declared scale range must match items x response range`);
+  }
 
   /* norms: one percentile per attainable raw score, monotone, spanning 0-100 */
   for (const [key, g] of Object.entries(tn.groups)) {
-    const width = tn.meta.scale_range[1] - tn.meta.scale_range[0] + 1;
     for (const s of scales) {
+      const width = tn.meta.scale_range[s][1] - tn.meta.scale_range[s][0] + 1;
       const t = g.s[s];
       ok(t && t.length === width, `${key}/${s}: expected ${width} percentiles, got ${t && t.length}`);
       ok(t.every((v, j) => j === 0 || v >= t[j - 1]), `${key}/${s}: percentiles must be non-decreasing`);
@@ -192,18 +196,27 @@ for (const [test, ti, tn] of extra) {
     ok(g.n >= 300, `${key}: norm groups need a usable n, got ${g.n}`);
   }
 
-  /* floor and ceiling answers must land at the ends without going out of range */
-  const all = (v) => Object.fromEntries(ti.map((i) => [i.seq, v]));
-  const floor = test.score(ti, all(rlo), tn, 'total');
-  const ceil = test.score(ti, all(rhi), tn, 'total');
+  /* floor and ceiling must respect keying: agreeing with a reversed item lowers the score */
+  const keyed = (dir) => Object.fromEntries(ti.map((i) =>
+    [i.seq, (i.keyed === 'minus') === (dir === 'lo') ? rhi : rlo]));
+  const floor = test.score(ti, keyed('lo'), tn, 'total');
+  const ceil = test.score(ti, keyed('hi'), tn, 'total');
   for (const s of scales) {
-    ok(floor.scales[s].raw === per[0] * rlo, `${s}: floor raw wrong`);
-    ok(ceil.scales[s].raw === per[0] * rhi, `${s}: ceiling raw wrong`);
+    const n = ti.filter((i) => i.scale === s).length;
+    ok(floor.scales[s].raw === n * rlo, `${s}: floor raw wrong, got ${floor.scales[s].raw}`);
+    ok(ceil.scales[s].raw === n * rhi, `${s}: ceiling raw wrong, got ${ceil.scales[s].raw}`);
     ok(floor.scales[s].pct >= 0 && floor.scales[s].pct <= 100, `${s}: floor percentile out of range`);
     ok(ceil.scales[s].pct >= 0 && ceil.scales[s].pct <= 100, `${s}: ceiling percentile out of range`);
     ok(ceil.scales[s].pct >= floor.scales[s].pct, `${s}: ceiling must not score below floor`);
   }
-  ok(floor.style.longestRun === ti.length && floor.style.extreme === 100, 'uniform answers must be flagged');
+  const uniform = test.score(ti, Object.fromEntries(ti.map((i) => [i.seq, rlo])), tn, 'total');
+  ok(uniform.style.longestRun === ti.length && uniform.style.extreme === 100,
+    'uniform answers must be flagged');
+  if (ti.some((i) => i.keyed === 'minus')) {
+    ok(new Set(scales.map((s) => uniform.scales[s].raw)).size >= 1
+      && scales.some((s) => uniform.scales[s].raw !== ti.filter((i) => i.scale === s).length * rlo),
+      'a reverse-keyed test must not floor when every answer is the same');
+  }
 
   /* every report renders, for a spread of profiles across the whole range */
   const ctx = { groupLabel: 'men aged 31-40', norms: tn, meta: { at: Date.now() } };
@@ -217,15 +230,16 @@ for (const [test, ti, tn] of extra) {
     ok(!/undefined|NaN|\[object/.test(txt), `${test.id}: report text contains a broken value`);
     rendered++;
   }
-  console.log(`  ${ti.length} items, ${scales.length} scales, ${Object.keys(tn.groups).length} norm groups, ` +
-    `${rendered} reports rendered clean`);
+  const rev = ti.filter((i) => i.keyed === 'minus').length;
+  console.log(`  ${ti.length} items (${rev} reversed), ${scales.length} scales, ` +
+    `${Object.keys(tn.groups).length} norm groups, ${rendered} reports rendered clean`);
 }
 
 /* DASS severity bands must match the published Lovibond cut-offs */
 section('dass severity');
 {
-  const ti = JSON.parse(readFileSync(new URL('data/dass/items.json', root)));
-  const tn = JSON.parse(readFileSync(new URL('data/dass/norms.json', root)));
+  const ti = load('dass', 'items');
+  const tn = load('dass', 'norms');
   const ctx = { groupLabel: 'everyone', norms: tn, meta: { at: Date.now() } };
   const CUT = { D: [9, 13, 20, 27], A: [7, 9, 14, 19], S: [14, 18, 25, 33] };
   const WORD = ['Normal', 'Mild', 'Moderate', 'Severe', 'Extremely severe'];
@@ -259,8 +273,8 @@ section('dass severity');
 /* Holland code must be the three highest scales, in order */
 section('holland code');
 {
-  const ti = JSON.parse(readFileSync(new URL('data/riasec/items.json', root)));
-  const tn = JSON.parse(readFileSync(new URL('data/riasec/norms.json', root)));
+  const ti = load('riasec', 'items');
+  const tn = load('riasec', 'norms');
   const ctx = { groupLabel: 'everyone', norms: tn, meta: { at: Date.now() } };
   let checked = 0;
   for (let seed = 1; seed <= 60; seed++) {
@@ -276,17 +290,76 @@ section('holland code');
   console.log(`  ${checked} profiles produced the correct three-letter code`);
 }
 
+/* the reverse keys are derived from the data; they must land on the published keys */
+section('published keys');
+{
+  const num = (i) => +i.code.replace(/\D/g, '');
+  const rev = (id, scale) => load(id, 'items')
+    .filter((i) => i.keyed === 'minus' && (!scale || i.scale === scale))
+    .map(num).sort((a, b) => a - b).join(',');
+  ok(rev('rse') === '3,5,8,9,10', 'Rosenberg reverse items are 3,5,8,9,10; got ' + rev('rse'));
+  ok(rev('ecr', 'AVO') === '3,15,19,25,27,29,31,33,35',
+    'ECR avoidance reverse items; got ' + rev('ecr', 'AVO'));
+  ok(rev('ecr', 'ANX') === '22', 'ECR anxiety reverse item is 22; got ' + rev('ecr', 'ANX'));
+  ok(rev('riasec') === '' && rev('dass') === '' && rev('dark') === '',
+    'RIASEC, DASS and the Dark Triad scales have no reverse items');
+  console.log('  derived keys match the published keys for every test');
+}
+
+/* attachment style must follow the two dimensions, not the raw sums */
+section('attachment style');
+{
+  const ti = load('ecr', 'items');
+  const tn = load('ecr', 'norms');
+  const ctx = { groupLabel: 'everyone', norms: tn, meta: { at: Date.now() } };
+  /* answer so that one named dimension is maximal and the other minimal */
+  const push = (high, low) => Object.fromEntries(ti.map((i) => {
+    const want = i.scale === high ? 'hi' : 'lo';
+    return [i.seq, (i.keyed === 'minus') === (want === 'lo') ? 5 : 1];
+  }));
+  const styleOf = (resp) =>
+    ECR.report(ECR.score(ti, resp, tn, 'total'), ctx).innerHTML.match(/class="code">(\w+)</)[1];
+  ok(styleOf(push('ANX')) === 'Preoccupied', 'high anxiety, low avoidance is Preoccupied');
+  ok(styleOf(push('AVO')) === 'Dismissing', 'high avoidance, low anxiety is Dismissing');
+  const allLow = Object.fromEntries(ti.map((i) => [i.seq, i.keyed === 'minus' ? 5 : 1]));
+  const allHigh = Object.fromEntries(ti.map((i) => [i.seq, i.keyed === 'minus' ? 1 : 5]));
+  ok(styleOf(allLow) === 'Secure', 'low on both is Secure');
+  ok(styleOf(allHigh) === 'Fearful', 'high on both is Fearful');
+  console.log('  all four attachment quadrants resolve correctly');
+}
+
+/* the self-esteem report must key its narrative off the standardised score */
+section('self-esteem');
+{
+  const ti = load('rse', 'items');
+  const tn = load('rse', 'norms');
+  const ctx = { groupLabel: 'everyone', norms: tn, meta: { at: Date.now() } };
+  const at = (dir) => RSE.score(ti,
+    Object.fromEntries(ti.map((i) => [i.seq, (i.keyed === 'minus') === (dir === 'lo') ? 4 : 1])),
+    tn, 'total');
+  ok(at('lo').scales.SE.raw === 10 && at('hi').scales.SE.raw === 40,
+    `keyed floor/ceiling should be 10 and 40, got ${at('lo').scales.SE.raw} and ${at('hi').scales.SE.raw}`);
+  ok(/Very low/.test(RSE.report(at('lo'), ctx).textContent), 'the lowest score reads as very low');
+  ok(/Very high/.test(RSE.report(at('hi'), ctx).textContent), 'the highest score reads as very high');
+  /* agreeing with every item should land mid-scale, not at an extreme */
+  const yes = RSE.score(ti, Object.fromEntries(ti.map((i) => [i.seq, 4])), tn, 'total');
+  ok(yes.scales.SE.raw === 25, `agreeing with everything should give 25, got ${yes.scales.SE.raw}`);
+  console.log('  reverse keying makes uniform agreement land mid-scale');
+}
+
+
 /* the test registry itself */
 section('registry');
-for (const t of [NEO, RIASEC, DASS]) {
+for (const t of [NEO, RIASEC, DASS, RSE, ECR, DARK]) {
   ok(t.id && t.name && t.sub && t.blurb && t.prompt, `${t.id}: missing descriptive text`);
   ok(Array.isArray(t.anchors) && t.anchors.length >= 4, `${t.id}: needs response anchors`);
   ok(typeof t.score === 'function' && typeof t.report === 'function', `${t.id}: needs score and report`);
   ok(t.paths && t.paths.items && t.paths.norms, `${t.id}: needs data paths`);
 }
-ok(new Set([NEO, RIASEC, DASS].map((t) => t.id)).size === 3, 'test ids must be unique');
-ok(new Set([NEO, RIASEC, DASS].map((t) => t.storageKey || t.id)).size === 3, 'storage keys must be unique');
-console.log('  3 tests registered with distinct ids and complete metadata');
+const ALL = [NEO, RIASEC, DASS, RSE, ECR, DARK];
+ok(new Set(ALL.map((t) => t.id)).size === ALL.length, 'test ids must be unique');
+ok(new Set(ALL.map((t) => t.storageKey || t.id)).size === ALL.length, 'storage keys must be unique');
+console.log(`  ${ALL.length} tests registered with distinct ids and complete metadata`);
 
 
 console.log('\n' + (fail ? `${fail} FAILURE(S)` : 'ALL SELF-TESTS PASSED'));

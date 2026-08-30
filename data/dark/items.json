@@ -1,0 +1,156 @@
+[
+{
+"scale": "M",
+"code": "DDM1",
+"text": "I tend to manipulate others to get my way.",
+"keyed": "plus",
+"seq": 1
+},
+{
+"scale": "M",
+"code": "DDM2",
+"text": "I have used deceit or lied to get my way.",
+"keyed": "plus",
+"seq": 2
+},
+{
+"scale": "M",
+"code": "DDM3",
+"text": "I have used flattery to get my way.",
+"keyed": "plus",
+"seq": 3
+},
+{
+"scale": "M",
+"code": "DDM4",
+"text": "I tend to exploit others towards my own end.",
+"keyed": "plus",
+"seq": 4
+},
+{
+"scale": "P",
+"code": "DDP1",
+"text": "I tend to lack remorse.",
+"keyed": "plus",
+"seq": 5
+},
+{
+"scale": "P",
+"code": "DDP2",
+"text": "I tend to not be too concerned with morality or the morality of my actions.",
+"keyed": "plus",
+"seq": 6
+},
+{
+"scale": "P",
+"code": "DDP3",
+"text": "I tend to be callous or insensitive.",
+"keyed": "plus",
+"seq": 7
+},
+{
+"scale": "P",
+"code": "DDP4",
+"text": "I tend to be cynical.",
+"keyed": "plus",
+"seq": 8
+},
+{
+"scale": "N",
+"code": "DDN1",
+"text": "I tend to want others to admire me.",
+"keyed": "plus",
+"seq": 9
+},
+{
+"scale": "N",
+"code": "DDN2",
+"text": "I tend to want others to pay attention to me.",
+"keyed": "plus",
+"seq": 10
+},
+{
+"scale": "N",
+"code": "DDN3",
+"text": "I tend to seek prestige or status.",
+"keyed": "plus",
+"seq": 11
+},
+{
+"scale": "N",
+"code": "DDN4",
+"text": "I tend to expect special favors from others.",
+"keyed": "plus",
+"seq": 12
+},
+{
+"scale": "H",
+"code": "HSNS1",
+"text": "I can become entirely absorbed in thinking about my personal affairs, my health, my cares or my relations to others.",
+"keyed": "plus",
+"seq": 13
+},
+{
+"scale": "H",
+"code": "HSNS2",
+"text": "My feelings are easily hurt by ridicule or the slighting remarks of others.",
+"keyed": "plus",
+"seq": 14
+},
+{
+"scale": "H",
+"code": "HSNS3",
+"text": "When I enter a room I often become self conscious and feel that the eyes of others are upon me.",
+"keyed": "plus",
+"seq": 15
+},
+{
+"scale": "H",
+"code": "HSNS4",
+"text": "I dislike sharing the credit of an achievement with others.",
+"keyed": "plus",
+"seq": 16
+},
+{
+"scale": "H",
+"code": "HSNS5",
+"text": "I feel that I have enough on my hands without worrying about other people's troubles.",
+"keyed": "plus",
+"seq": 17
+},
+{
+"scale": "H",
+"code": "HSNS6",
+"text": "I feel that I am temperamentally different from most people.",
+"keyed": "plus",
+"seq": 18
+},
+{
+"scale": "H",
+"code": "HSNS7",
+"text": "I often interpret the remarks of others in a personal way.",
+"keyed": "plus",
+"seq": 19
+},
+{
+"scale": "H",
+"code": "HSNS8",
+"text": "I easily become wrapped up in my own interests and forget the existence of others.",
+"keyed": "plus",
+"seq": 20
+},
+{
+"scale": "H",
+"code": "HSNS9",
+"text": "I dislike being with a group unless I know that I am appreciated by at least one of those present.",
+"keyed": "plus",
+"seq": 21
+},
+{
+"scale": "H",
+"code": "HSNS10",
+"text": "I am secretly \"put out\" or annoyed when other people come to me with their troubles, asking me for my time and sympathy.",
+"keyed": "plus",
+"seq": 22
+}
+]

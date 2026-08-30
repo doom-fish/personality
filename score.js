@@ -148,17 +148,18 @@ export function contradictions(result, minGap = 3) {
   return out.sort((x, y) => y.gap - x.gap);
 }
 
-/** Scoring for the simple sum-per-scale tests (RIASEC, DASS): no reverse keys, no facets. */
+/** Scoring for the simple sum-per-scale tests: reverse-keys where the item bank says to. */
 export function scoreScales(items, responses, norms, groupKey) {
   const group = norms.groups[groupKey] || norms.groups.total;
-  const lo = norms.meta.scale_range[0];
+  const [rlo, rhi] = norms.meta.response_range;
   const scales = {};
   for (const it of items) {
     const s = (scales[it.scale] ??= { scale: it.scale, raw: 0, n: 0 });
-    s.raw += responses[it.seq];
+    const v = responses[it.seq];
+    s.raw += it.keyed === 'minus' ? rlo + rhi - v : v;
     s.n++;
   }
-  for (const s of Object.values(scales)) s.pct = lookup(group.s[s.scale], s.raw, lo);
+  for (const s of Object.values(scales)) s.pct = lookup(group.s[s.scale], s.raw, norms.meta.scale_range[s.scale][0]);
   return {
     scales, responses, items,
     group: { key: groupKey, n: group.n },
