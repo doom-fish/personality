@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personality Assessment — IPIP-NEO-120 + HEXACO-H</title>
+<meta name="description" content="A 140-item public-domain personality assessment scored against empirical norms. Everything runs in your browser; nothing is uploaded.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23245c73'/><rect x='6' y='9' width='20' height='3' rx='1.5' fill='%23fff'/><rect x='6' y='15' width='13' height='3' rx='1.5' fill='%23fff' opacity='.75'/><rect x='6' y='21' width='17' height='3' rx='1.5' fill='%23fff' opacity='.5'/></svg>">
+</head>
+<body>
+
+<div class="topbar noprint">
+  <strong style="font-size:14px">Personality Assessment</strong>
+  <span class="sp"></span>
+  <span id="crumb" class="muted"></span>
+  <button id="theme" class="small" title="Toggle dark mode">Dark</button>
+</div>
+
+<div class="wrap">
+
+<!-- ─── intro ─── -->
+<section id="s-intro">
+  <h1>Personality Assessment</h1>
+  <p class="lede">140 public-domain items. Scored against empirical norms from 410,376 people. Blunt, not flattering.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">What this actually is</h3>
+    <p>Two instruments, both public domain, both with published validity evidence:</p>
+    <table style="margin-bottom:14px">
+      <tr><td class="nm">IPIP-NEO-120<span class="sub">Johnson (2014)</span></td>
+          <td>120 items measuring the Big Five across 30 facets. Facet reliabilities .64–.88.</td></tr>
+      <tr><td class="nm">IPIP HEXACO-H<span class="sub">Ashton &amp; Lee</span></td>
+          <td>20 items measuring Honesty-Humility — the trait the Big Five omits.</td></tr>
+    </table>
+    <p class="muted">Your percentiles come from Johnson's validation dataset, restricted to your own sex and
+    age band, using exact tie-corrected ranks — not a bell-curve approximation. No norms are invented.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Privacy</h3>
+    <p class="muted">Scoring happens entirely in this page. Your answers never leave your device, and there is
+    no server, no account and no analytics. Progress is saved to this browser's local storage so you can stop
+    and resume; “Delete my data” erases it.</p>
+  </div>
+
+  <div class="callout">
+    <b>This gives blunt output.</b> It reports what the numbers say, including the unflattering parts.
+    It is a research-grade self-report questionnaire, not a clinical assessment, and it cannot diagnose anything.
+  </div>
+
+  <div class="row" style="margin-top:18px">
+    <button class="primary" id="go">Begin</button>
+    <button id="resume" class="hide">Resume</button>
+    <button id="loadfile">Load a saved result</button>
+    <input type="file" id="file" accept="application/json" class="hide">
+  </div>
+</section>
+
+<!-- ─── setup ─── -->
+<section id="s-setup" class="hide">
+  <h1>Norm group</h1>
+  <p class="lede">Personality norms differ by sex and age. These two answers select your comparison group;
+  they are not scored.</p>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label class="fld" for="sex">Compare me against</label>
+        <select id="sex">
+          <option value="1">Men</option>
+          <option value="2">Women</option>
+          <option value="total">Everyone (combined)</option>
+        </select>
+      </div>
+      <div>
+        <label class="fld" for="age">Age</label>
+        <input type="number" id="age" min="10" max="100" value="30">
+      </div>
+    </div>
+    <p class="tiny" id="groupinfo" style="margin:14px 0 0"></p>
+  </div>
+  <div class="row">
+    <button class="primary" id="start">Start the questionnaire</button>
+    <button id="back-intro">Back</button>
+  </div>
+</section>
+
+<!-- ─── test ─── -->
+<section id="s-test" class="hide">
+  <div style="position:sticky;top:44px;background:var(--bg);padding:14px 0 10px;z-index:10">
+    <div class="prog"><i id="bar" style="width:0%"></i></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="muted" id="count"></span>
+      <span class="muted">Describe yourself as you generally are now — not as you wish to be.</span>
+    </div>
+  </div>
+  <p class="tiny" style="margin-bottom:0">Keys <b>1</b>–<b>5</b> answer the first unanswered item on the page.</p>
+  <div id="qs"></div>
+  <div class="row" style="margin-top:20px">
+    <button id="prev">Back</button>
+    <button class="primary" id="next" disabled>Next</button>
+    <span class="sp"></span>
+    <button id="quit" class="small">Save &amp; exit</button>
+  </div>
+</section>
+
+<!-- ─── report ─── -->
+<section id="s-report" class="hide">
+  <div id="rpt"></div>
+  <div class="row noprint" style="margin-top:26px">
+    <button class="primary" id="print">Save as PDF</button>
+    <button id="save">Export JSON</button>
+    <button id="cmp">Compare with another result</button>
+    <span class="sp"></span>
+    <button id="wipe" class="small">Delete my data</button>
+  </div>
+  <input type="file" id="cmpfile" accept="application/json" class="hide">
+</section>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
